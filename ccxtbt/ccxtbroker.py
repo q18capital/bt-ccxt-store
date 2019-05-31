@@ -134,6 +134,7 @@ class CCXTBroker(with_metaclass(MetaCCXTBroker, BrokerBase)):
         self.notifs = queue.Queue()  # holds orders which are notified
 
         self.open_orders = list()
+        self.order_to_log = []
 
         self.startingcash = self.store._cash
         self.startingvalue = self.store._value
@@ -161,6 +162,9 @@ class CCXTBroker(with_metaclass(MetaCCXTBroker, BrokerBase)):
         # return self.store.getvalue(self.currency)
         self.value = self.store._value
         return self.value
+
+    def get_value(self, datas=None):
+        return self.getvalue(datas)
 
     def get_notification(self):
         try:
@@ -199,6 +203,7 @@ class CCXTBroker(with_metaclass(MetaCCXTBroker, BrokerBase)):
 
             # Check if the order is closed
             if ccxt_order[self.mappings['closed_order']['key']] == self.mappings['closed_order']['value']:
+                self.order_to_log.append(ccxt_order)
                 pos = self.getposition(o_order.data, clone=False)
                 pos.update(o_order.size, o_order.price)
                 o_order.completed()
